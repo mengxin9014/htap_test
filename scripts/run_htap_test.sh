@@ -1,5 +1,5 @@
 #!/bin/bash
-tcctl testbed create -f htap-test-tidb.yaml -r http://rms.pingcap.net:30007
+tcctl testbed create -f htap_test/config/tidb.yaml -r http://rms.pingcap.net:30007
 
 pd_host=$(KUBECONFIG=kubeconfig.yml  kubectl get pod/htap-test-pd-0 -owide | grep htap-test-pd-0 | awk '{print $6}')
 tidb_host=$(KUBECONFIG=kubeconfig.yml  kubectl get pod/htap-test-tidb-0 -owide | grep htap-test-tidb-0 | awk '{print $6}')
