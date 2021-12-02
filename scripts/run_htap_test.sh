@@ -12,6 +12,10 @@ KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp htap_test/scripts/init.sh h
 KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp htap_test/scripts/start.sh htap-test-tiflash-0:/htap_test
 
 KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it htap-test-tiflash-0 -- sh /htap_test/init.sh
+
+KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp htap_test/table_statics/benchbase_table_static.tar.gz htap-test-tiflash-0:/htap_test/benchbase
+KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it htap-test-tiflash-0 -- tar zxvf /htap_test/benchbase/benchbase_table_static.tar.gz -C /htap_test/benchbase
+
 KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it htap-test-tiflash-0 -- sh /htap_test/start.sh ${tidb_host} ${pd_host}
 
 mkdir record/
