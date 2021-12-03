@@ -115,6 +115,12 @@ items:
           config: |
             [log]
             level = "info"
+            [profiles.default]
+            max_memory_usage = 34359738368
+            max_memory_usage_for_all_queries = 34359738368
+            dt_segment_force_merge_delta_rows = 8000000
+            dt_segment_force_merge_delta_size = 1073741824
+            dt_segment_stop_write_delta_rows = 40000000
           proxy: |
             log-level = "info"
             log-file = "/var/lib/tiflash/log/proxy.log"
