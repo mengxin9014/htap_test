@@ -101,11 +101,14 @@ items:
         requests:
           cpu: 32000m
           memory: 64Gi
-          storage: 2000Gi
         limits:
           cpu: 32000m
           memory: 64Gi
-          storage: 2000Gi
+        storageClaims:
+          - resources:
+              requests:
+                storage: 1000Gi
+            storageClassName: fast-disks
         service:
           type: NodePort
         securityContext:
