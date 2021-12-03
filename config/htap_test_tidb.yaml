@@ -39,7 +39,7 @@ items:
       tidb:
         replicas: 1
         storageClassName: fast-disks
-        image: pingcap/pd:v5.3.0
+        image: pingcap/tidb:v5.3.0
         requests:
           cpu: 8000m
           memory: 16Gi
@@ -61,7 +61,7 @@ items:
       tikv:
         replicas: 4
         storageClassName: fast-disks
-        image: pingcap/pd:v5.3.0
+        image: pingcap/tikv:v5.3.0
         # more refer to: https://github.com/tikv/tikv/blob/master/etc/config-template.toml
         requests:
           cpu: 8000m
@@ -95,7 +95,7 @@ items:
       tiflash:
         replicas: 2
         storageClassName: fast-disks
-        image: pingcap/pd:v5.3.0
+        image: pingcap/tiflash:v5.3.0
         # more refer to: https://docs.pingcap.com/zh/tidb/stable/tiflash-configuration#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-tiflashtoml
         # you need at lease uses github.com/pingcap/test-infra/sdk@v0.0.0-20210705141439-f1670c1d3048 or newer version
         requests:
