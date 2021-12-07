@@ -22,16 +22,16 @@
 #
 #tcctl testbed delete ${namespace} -r http://rms.pingcap.net:30007
 
-function gen_yaml() {
-    local kv=$1
-    local flash=$2
-    rm -rf htap_test/config/write_throughput_test_tidb_${kv}_${flash}.yaml
-    cat htap_test/config/write_throughput_test_tidb.yaml > htap_test/config/write_throughput_test_tidb_${kv}_${flash}.yaml
-    cat htap_test/config/tikv.yaml >> htap_test/config/write_throughput_test_tidb_${kv}_${flash}.yaml
-    echo "        replica: $kv" >> htap_test/config/write_throughput_test_tidb_${kv}_${flash}.yaml
-    cat htap_test/config/tiflash.yaml >> htap_test/config/write_throughput_test_tidb_${kv}_${flash}.yaml
-    echo "        replica: $flash" >> htap_test/config/write_throughput_test_tidb_${kv}_${flash}.yaml
-}
+#function gen_yaml() {
+#    local kv=$1
+#    local flash=$2
+#    rm -rf htap_test/config/write_throughput_test_tidb_${kv}_${flash}.yaml
+#    cat htap_test/config/write_throughput_test_tidb.yaml > htap_test/config/write_throughput_test_tidb_${kv}_${flash}.yaml
+#    cat htap_test/config/tikv.yaml >> htap_test/config/write_throughput_test_tidb_${kv}_${flash}.yaml
+#    echo "        replica: $kv" >> htap_test/config/write_throughput_test_tidb_${kv}_${flash}.yaml
+#    cat htap_test/config/tiflash.yaml >> htap_test/config/write_throughput_test_tidb_${kv}_${flash}.yaml
+#    echo "        replica: $flash" >> htap_test/config/write_throughput_test_tidb_${kv}_${flash}.yaml
+#}
 
 threads="1 2 4"
 
@@ -42,7 +42,7 @@ do
     kv_tiflash=(${1//// })
     kv=${kv_tiflash[0]}
     flash=${kv_tiflash[1]}
-    gen_yaml $kv $flash
+#    gen_yaml $kv $flash
   #:    echo ${kv}_${flash}
 
     namespace=$(tcctl testbed list -r http://rms.pingcap.net:30007 | grep write-throughput-test-tidb |awk '{print $1}')
@@ -52,6 +52,12 @@ do
       sleep 1
       namespace=$(tcctl testbed list -r http://rms.pingcap.net:30007 | grep write-throughput-test-tidb |awk '{print $1}')
     done
+
+    if [ ! -f "htap_test/config/write_throughput_test_tidb_${kv}_${flash}.yaml" ]
+    then
+      echo htap_test/config/write_throughput_test_tidb_${kv}_${flash}.yaml not exists, please create it.
+      exit 1
+    fi
 
     tcctl testbed create -f htap_test/config/write_throughput_test_tidb_${kv}_${flash}.yaml -r http://rms.pingcap.net:30007
 
