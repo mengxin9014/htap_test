@@ -1,0 +1,32 @@
+      tikv:
+        storageClassName: fast-disks
+        image: pingcap/tikv:v5.2.2
+        # more refer to: https://github.com/tikv/tikv/blob/master/etc/config-template.toml
+        requests:
+          cpu: 8000m
+          memory: 32Gi
+          storage: 2000Gi
+        limits:
+          cpu: 8000m
+          memory: 32Gi
+          storage: 2000Gi
+        service:
+          type: NodePort
+        config: |
+          ## Log levels: trace, debug, info, warning, error, critical.
+          ## Note that `debug` and `trace` are only available in development builds.
+          [log]
+          level = "info"
+          [storage]
+          reserve-space = 0
+          [storage.block-cache]
+          rocksdb.defaultcf.block-cache-size = "8G"
+          rocksdb.writecf.block-cache-size = "5G"
+          rocksdb.lockcf.block-cache-size = "512M"
+          raftdb.defaultcf.block-cache-size = "512M"
+          [rocksdb.defaultcf]
+          compression-per-level = ["no", "no", "no", "no", "no", "no", "no"]
+          [rocksdb.writecf]
+          compression-per-level = ["no", "no", "no", "no", "no", "no", "no"]
+          [rocksdb.lockcf]
+          compression-per-level = ["no", "no", "no", "no", "no", "no", "no"]

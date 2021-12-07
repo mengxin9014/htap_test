@@ -17,7 +17,7 @@
 #KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp htap_test/table_statics/benchbase_table_static.tar.gz htap-test-tiflash-0:/htap_test/benchbase
 #KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it htap-test-tiflash-0 -- tar zxvf /htap_test/benchbase/benchbase_table_static.tar.gz -C /htap_test/benchbase
 #
-#KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it htap-test-tiflash-0 -- sh /htap_test/start_htap_test.sh ${tidb_host} ${pd_host}
+#KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it htap-test-tiflash-0 -- sh /htap_test/start_htap_test.sh ${tidb_host} ${pd_host}  ${query} ${thread}
 #
 #mkdir record/
 #KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp htap-test-tiflash-0:/htap_test/benchbase/record/ch_benchmark_test.txt record/ch_benchmark_test.txt
@@ -25,18 +25,9 @@
 #
 #tcctl testbed delete ${namespace} -r http://rms.pingcap.net:30007
 
-
-namespace=$(tcctl testbed list -r http://rms.pingcap.net:30007 | grep htap-test-tidb |awk '{print $1}')
-
 ap_threads="1 5 10 20 30"
 for thread in $ap_threads
 do
-  while [ ${namespace} != "" ]
-  do
-    echo wait ${namespace} be deleted.
-    sleep 1
-    namespace=$(tcctl testbed list -r http://rms.pingcap.net:30007 | grep htap-test-tidb |awk '{print $1}')
-  done
   if [ ${thread} -ne 1 ]
   then
     querys="Q6 Q12 Q13 Q14"
@@ -46,6 +37,14 @@ do
 
   for query in $querys
   do
+    namespace=$(tcctl testbed list -r http://rms.pingcap.net:30007 | grep htap-test-tidb |awk '{print $1}')
+    while [ "${namespace}" != "" ]
+    do
+      echo wait ${namespace} be deleted.
+      sleep 1
+      namespace=$(tcctl testbed list -r http://rms.pingcap.net:30007 | grep htap-test-tidb |awk '{print $1}')
+    done
+
     tcctl testbed create -f htap_test/config/htap_test_tidb.yaml -r http://rms.pingcap.net:30007
 
     namespace=$(tcctl testbed list -r http://rms.pingcap.net:30007 | grep htap-test-tidb |awk '{print $1}')
@@ -61,14 +60,15 @@ do
     sleep 2
     KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it htap-test-tiflash-0 -- sh /htap_test/init_htap_test.sh
 
+    KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp htap_test/resource/querys_map.txt htap-test-tiflash-0:/htap_test/benchbase/querys_map.txt
+
     KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp htap_test/table_statics/benchbase_table_static.tar.gz htap-test-tiflash-0:/htap_test/benchbase
     KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it htap-test-tiflash-0 -- tar zxvf /htap_test/benchbase/benchbase_table_static.tar.gz -C /htap_test/benchbase
 
-    KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it htap-test-tiflash-0 -- sh /htap_test/start_htap_test.sh ${tidb_host} ${pd_host}
+    KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it htap-test-tiflash-0 -- sh /htap_test/start_htap_test.sh ${tidb_host} ${pd_host} ${query} ${thread}
 
     mkdir record/
     KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp htap-test-tiflash-0:/htap_test/benchbase/record/ch_benchmark_test.txt record/ch_benchmark_test_q_${query}_t_${thread}.txt
-    KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp htap-test-tiflash-0:/htap_test/benchbase/record/ch_benchmark_small_query_test.txt record/ch_benchmark_small_query_test_q_${query}_t_${thread}.txt
 
     tcctl testbed delete ${namespace} -r http://rms.pingcap.net:30007
 

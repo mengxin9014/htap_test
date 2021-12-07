@@ -42,11 +42,11 @@ items:
         image: pingcap/tidb:v5.3.0
         requests:
           cpu: 8000m
-          memory: 16Gi
+          memory: 32Gi
           storage: 500Gi
         limits:
           cpu: 8000m
-          memory: 16Gi
+          memory: 32Gi
           storage: 500Gi
         service:
           type: NodePort
@@ -93,17 +93,17 @@ items:
           raft-client-queue-size = 81920
 
       tiflash:
-        replicas: 2
+        replicas: 4
         storageClassName: fast-disks
         image: pingcap/tiflash:v5.3.0
         # more refer to: https://docs.pingcap.com/zh/tidb/stable/tiflash-configuration#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-tiflashtoml
         # you need at lease uses github.com/pingcap/test-infra/sdk@v0.0.0-20210705141439-f1670c1d3048 or newer version
         requests:
           cpu: 32000m
-          memory: 64Gi
+          memory: 128Gi
         limits:
           cpu: 32000m
-          memory: 64Gi
+          memory: 128Gi
         storageClaims:
           - resources:
               requests:
@@ -119,8 +119,8 @@ items:
             [log]
             level = "info"
             [profiles.default]
-            max_memory_usage = 34359738368
-            max_memory_usage_for_all_queries = 34359738368
+            max_memory_usage = 128849018880
+            max_memory_usage_for_all_queries = 128849018880
             dt_segment_force_merge_delta_rows = 8000000
             dt_segment_force_merge_delta_size = 1073741824
             dt_segment_stop_write_delta_rows = 40000000
