@@ -53,7 +53,7 @@ do
       namespace=$(tcctl testbed list -r http://rms.pingcap.net:30007 | grep write-throughput-test-tidb |awk '{print $1}')
     done
 
-    tcctl testbed create -f htap_test/config/write_throughput_test/config/write_thoughput_test_tidb_${kv}_${flash}.yaml -r http://rms.pingcap.net:30007
+    tcctl testbed create -f htap_test/config/write_thoughput_test_tidb_${kv}_${flash}.yaml -r http://rms.pingcap.net:30007
 
     namespace=$(tcctl testbed list -r http://rms.pingcap.net:30007 | grep write-throughput-test-tidb |awk '{print $1}')
     pd_host=$(KUBECONFIG=kubeconfig.yml  kubectl -n ${namespace} get pod/write-throughput-test-pd-0 -owide | grep write-throughput-test-pd-0 | awk '{print $6}')

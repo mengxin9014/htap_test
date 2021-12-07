@@ -1,4 +1,4 @@
-generateName: htap-test-tidb-
+generateName: write_thoughput_test-tidb-
 resourcePool: quantify_products
 reclaimPolicy:
   gcStrategy:
@@ -12,7 +12,7 @@ reclaimPolicy:
         log: true
 
 items:
-  - name: htap-test # 资源对象项名称
+  - name: write_thoughput_test # 资源对象项名称
     type: TIDB_CLUSTER # 资源对象类型
     spec:
       # 如果使用一个具体的版本, 例如 v5.0.1 而不是 nightly, master 等, 通过设置 IfNotPresent 可以加速创建速度
@@ -20,7 +20,7 @@ items:
       pd:
         replicas: 1
         storageClassName: fast-disks
-        image: pingcap/pd:v5.2.2
+        image: pingcap/pd:v5.3.0
         # more refer to: https://github.com/tikv/pd/blob/master/conf/config.toml
         # config is string type and toml format, I prefer uses https://www.convertsimple.com/convert-yaml-to-toml/ to transfer yaml to toml
         requests:
@@ -39,7 +39,7 @@ items:
       tidb:
         replicas: 1
         storageClassName: fast-disks
-        image: pingcap/tidb:v5.2.2
+        image: pingcap/tidb:v5.3.0
         requests:
           cpu: 8000m
           memory: 16Gi

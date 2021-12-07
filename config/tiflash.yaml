@@ -1,16 +1,18 @@
       tiflash:
-        storageClassName: fast-disks
-        image: pingcap/tiflash:v5.2.2
+        image: pingcap/tiflash:v5.3.0
         # more refer to: https://docs.pingcap.com/zh/tidb/stable/tiflash-configuration#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-tiflashtoml
         # you need at lease uses github.com/pingcap/test-infra/sdk@v0.0.0-20210705141439-f1670c1d3048 or newer version
         requests:
           cpu: 32000m
           memory: 64Gi
-          storage: 2000Gi
         limits:
           cpu: 32000m
           memory: 64Gi
-          storage: 2000Gi
+        storageClaims:
+          - resources:
+              requests:
+                storage: 1000Gi
+            storageClassName: fast-disks
         service:
           type: NodePort
         securityContext:
@@ -22,7 +24,7 @@
             level = "info"
             [profiles.default]
             max_memory_usage = 64424509440
-            max_memory_usage_for_all_queries = 128849018880
+            max_memory_usage_for_all_queries = 64424509440
             dt_segment_force_merge_delta_rows = 8000000
             dt_segment_force_merge_delta_size = 1073741824
             dt_segment_stop_write_delta_rows = 40000000
