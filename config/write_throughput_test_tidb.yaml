@@ -1,4 +1,4 @@
-generateName: write_thoughput_test-tidb-
+generateName: write-throughput-test-tidb-
 resourcePool: quantify_products
 reclaimPolicy:
   gcStrategy:
@@ -12,7 +12,7 @@ reclaimPolicy:
         log: true
 
 items:
-  - name: write_thoughput_test # 资源对象项名称
+  - name: write-throughput-test # 资源对象项名称
     type: TIDB_CLUSTER # 资源对象类型
     spec:
       # 如果使用一个具体的版本, 例如 v5.0.1 而不是 nightly, master 等, 通过设置 IfNotPresent 可以加速创建速度
