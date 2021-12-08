@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /htap_test
+cd /write_throughput_test
 
 yum -y install wget
 yum -y install git
