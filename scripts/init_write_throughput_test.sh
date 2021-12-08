@@ -10,7 +10,7 @@ yum -y install mysql
 curl -s https://packagecloud.io/install/repositories/akopytov/sysbench/script.rpm.sh | bash
 yum -y install sysbench
 
-wget https://studygolang.com/dl/golang/go1.17.3.linux-amd64.tar.gz
+wget https://go.dev/dl/go1.17.3.linux-amd64.tar.gz
 tar -zxvf go1.17.3.linux-amd64.tar.gz
 mv go /usr/local
 echo "export GOROOT=/usr/local/go" >> /etc/profile
