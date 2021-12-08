@@ -93,7 +93,7 @@ items:
           raft-client-queue-size = 81920
 
       tiflash:
-        replicas: 1
+        replicas: 2
         storageClassName: fast-disks
         image: pingcap/tiflash:v5.3.0
         # more refer to: https://docs.pingcap.com/zh/tidb/stable/tiflash-configuration#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-tiflashtoml
