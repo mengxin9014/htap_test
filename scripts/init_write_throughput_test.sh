@@ -7,7 +7,7 @@ yum -y install git
 yum -y install make
 yum -y install tar
 yum -y install mysql
-curl -s https://packagecloud.io/install/repositories/akopytov/sysbench/script.rpm.sh | sudo bash
+curl -s https://packagecloud.io/install/repositories/akopytov/sysbench/script.rpm.sh | bash
 yum -y install sysbench
 
 wget https://studygolang.com/dl/golang/go1.17.3.linux-amd64.tar.gz
