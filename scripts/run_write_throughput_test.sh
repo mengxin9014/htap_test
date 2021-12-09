@@ -1,15 +1,15 @@
 #!/bin/bash
 
 threads="1 2 4"
-
-for thread in $threads
+while [ $# -ge 1 ]
 do
-  while [ $# -ge 1 ]
-  do
-    kv_tiflash=(${1//// })
-    kv=${kv_tiflash[0]}
-    flash=${kv_tiflash[1]}
+  kv_tiflash=(${1//// })
+  kv=${kv_tiflash[0]}
+  flash=${kv_tiflash[1]}
+  shift
 
+  for thread in $threads
+  do
     namespace=$(tcctl testbed list -r http://rms.pingcap.net:30007 | grep write-throughput-test-tidb |awk '{print $1}')
     while [ "${namespace}" != "" ]
     do
@@ -49,4 +49,3 @@ do
 
   done
 done
-
