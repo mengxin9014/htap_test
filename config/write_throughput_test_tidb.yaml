@@ -42,11 +42,11 @@ items:
         image: pingcap/tidb:v5.3.0
         requests:
           cpu: 8000m
-          memory: 16Gi
+          memory: 32Gi
           storage: 500Gi
         limits:
           cpu: 8000m
-          memory: 16Gi
+          memory: 32Gi
           storage: 500Gi
         service:
           type: NodePort
@@ -57,3 +57,81 @@ items:
           [log]
           # Log level: debug, info, warn, error, fatal.
           level = "info"
+
+      tikv:
+        replicas: 3
+        storageClassName: fast-disks
+        image: pingcap/tikv:v5.3.0
+        # more refer to: https://github.com/tikv/tikv/blob/master/etc/config-template.toml
+        requests:
+          cpu: 8000m
+          memory: 32Gi
+          storage: 2000Gi
+        limits:
+          cpu: 8000m
+          memory: 32Gi
+          storage: 2000Gi
+        service:
+          type: NodePort
+        config: |
+          ## Log levels: trace, debug, info, warning, error, critical.
+          ## Note that `debug` and `trace` are only available in development builds.
+          [storage]
+          reserve-space = 0
+          [storage.block-cache]
+          shared = true
+          capacity = "12G"
+          [rocksdb.defaultcf]
+          compression-per-level = ["no", "no", "no", "no", "no", "no", "no"]
+          [rocksdb.writecf]
+          compression-per-level = ["no", "no", "no", "no", "no", "no", "no"]
+          [rocksdb.lockcf]
+          compression-per-level = ["no", "no", "no", "no", "no", "no", "no"]
+          [raftstore]
+          apply-low-priority-pool-size = 4
+          [server]
+          raft-client-queue-size = 81920
+
+      # if tikv and tiflash replicas lines were changed, the generation of write_throughput_test_tidb.yaml in run_write_throughput_test.sh should be same changed
+      tiflash:
+        replicas: 1
+        storageClassName: fast-disks
+        image: pingcap/tiflash:v5.3.0
+        # more refer to: https://docs.pingcap.com/zh/tidb/stable/tiflash-configuration#%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6-tiflashtoml
+        # you need at lease uses github.com/pingcap/test-infra/sdk@v0.0.0-20210705141439-f1670c1d3048 or newer version
+        requests:
+          cpu: 32000m
+          memory: 64Gi
+        limits:
+          cpu: 32000m
+          memory: 64Gi
+        storageClaims:
+          - resources:
+              requests:
+                storage: 1000Gi
+            storageClassName: fast-disks
+        service:
+          type: NodePort
+        securityContext:
+          capabilities:
+            add: ["SYS_ADMIN", "SYS_PTRACE", "NET_ADMIN"]
+        config:
+          config: |
+            [log]
+            level = "info"
+            [profiles.default]
+            max_memory_usage = 64424509440
+            max_memory_usage_for_all_queries = 64424509440
+            dt_segment_force_merge_delta_rows = 8000000
+            dt_segment_force_merge_delta_size = 1073741824
+            dt_segment_stop_write_delta_rows = 40000000
+          proxy: |
+            log-level = "info"
+            log-file = "/var/lib/tiflash/log/proxy.log"
+            [raftstore]
+            apply-low-priority-pool-size = 16
+            apply-pool-size = 4
+            store-pool-size = 4
+            snap-handle-pool-size = 8
+            [server]
+            raft-client-queue-size = 81920

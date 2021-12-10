@@ -1,6 +1,8 @@
 #!/bin/bash
+set -euo pipefail
 
-cd /htap_test
+base_dir=$1
+cd $base_dir
 
 yum -y install wget
 yum -y install git
