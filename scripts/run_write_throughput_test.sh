@@ -22,7 +22,7 @@ do
       namespace=$(tcctl testbed list -r http://rms.pingcap.net:30007 | grep write-throughput-test-tidb |awk '{print $1}')
     done
 
-    cat htap_test/config/write_throughput_test_tidb.yaml | sed "62s/replicas: .*/replicas: ${kv}/g" | sed "97s/replicas: .*/replicas: ${flash}/g" > write_throughput_test_tidb_${kv}_${flash}.yaml
+    cat htap_test/config/write_throughput_test_tidb.yaml | sed "62s/replicas: .*/replicas: ${kv}/g" | sed "97s/replicas: .*/replicas: ${flash}/g" > htap_test/config/write_throughput_test_tidb_${kv}_${flash}.yaml
 
     tcctl testbed create -f htap_test/config/write_throughput_test_tidb_${kv}_${flash}.yaml -r http://rms.pingcap.net:30007
 
