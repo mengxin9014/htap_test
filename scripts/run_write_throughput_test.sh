@@ -1,5 +1,4 @@
 #!/bin/bash
-set -euo pipefail
 
 base_dir="/write_throughput_test"
 record_dir="write_throughput_record"
@@ -15,7 +14,7 @@ do
 
   for thread in $threads
   do
-    namespace=$(tcctl testbed list -r http://rms.pingcap.net:30007 | grep write-throughput-test-tidb |awk '{print $1}') || namespace="full"
+    namespace=$(tcctl testbed list -r http://rms.pingcap.net:30007 | grep write-throughput-test-tidb |awk '{print $1}')
     while [ "${namespace}" != "" ]
     do
       echo wait ${namespace} be deleted.
@@ -38,10 +37,22 @@ do
 
     KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it write-throughput-test-tiflash-0 -- sh $base_dir/init_write_throughput_test.sh ${base_dir}
 
+    if [ ${?} -ne 0 ]
+    then
+      echo init failed.
+      exit 1
+    fi
+
     KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp htap_test/table_statics/benchbase_table_static.tar.gz write-throughput-test-tiflash-0:$base_dir/benchbase
     KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it write-throughput-test-tiflash-0 -- tar zxvf $base_dir/benchbase/benchbase_table_static.tar.gz -C $base_dir/benchbase
 
     KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it write-throughput-test-tiflash-0 -- sh $base_dir/start_write_throughput_test.sh ${base_dir} ${tidb_host} ${pd_host} ${thread}
+
+    if [ ${?} -ne 0 ]
+    then
+      echo start failed.
+      exit 1
+    fi
 
     KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp write-throughput-test-tiflash-0:$base_dir/benchbase/record/write_throughput_test.txt $record_dir/write_throughput_test_tikv_${kv}_tiflash_${flash}_t_${thread}.txt
 
