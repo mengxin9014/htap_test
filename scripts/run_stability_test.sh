@@ -9,13 +9,15 @@ function scale_tiflash() {
 
     current_replicas=$(KUBECONFIG=kubeconfig.yml  kubectl -n ${namespace} get pod  -owide | grep tiflash | wc -l)
     status=$(KUBECONFIG=kubeconfig.yml kubectl get tidbcluster stability-test -n ${namespace} | awk '{print $2}' | sed -n '2p')
-    while [ $current_replicas -ne $target_replicas ] && [ $status != "True" ]
+
+    while [ $current_replicas -ne $target_replicas ] || [ $status != "True" ]
     do
       echo wait scale tiflash.
       sleep 10
       status=$(KUBECONFIG=kubeconfig.yml kubectl get tidbcluster stability-test -n ${namespace} | awk '{print $2}' | sed -n '2p')
     done
     echo scale tiflash success.
+    pd-ctl store limit all 200 -u ${pd_host}:2379
 }
 
 function restart_tiflash() {
@@ -40,12 +42,18 @@ function restart_tiflash() {
 }
 
 function wait_tiflash_region_balance() {
-    sleep 10
     operator_info=$(KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it stability-test-tiflash-0 -- pd-ctl operator show -u http://${pd_host}:2379 | xargs echo)
-    while [ ${#operator_info} -ne 3 ]
+    finish_count=0
+    while [ ${#operator_info} -gt 5 ] || [ $finish_count -le 5 ]
     do
+      if [ ${#operator_info} -gt 5 ]
+      then
+        finish_count=0
+      else
+        finish_count=$(expr $finish_count + 1)
+      fi
       echo wait balance region.
-      sleep 10
+      sleep 5
       operator_info=$(KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it stability-test-tiflash-0 -- pd-ctl operator show -u http://${pd_host}:2379 | xargs echo)
     done
     echo balance region finish.
@@ -72,6 +80,14 @@ function init_env() {
     KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp htap_test/resource/querys_map.txt stability-test-tiflash-0:$base_dir/benchbase/querys_map.txt
     KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp htap_test/table_statics/benchbase_table_static.tar.gz stability-test-tiflash-0:$base_dir/benchbase
     KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it stability-test-tiflash-0 -- tar zxvf $base_dir/benchbase/benchbase_table_static.tar.gz -C $base_dir/benchbase
+}
+
+function exit_if_failed() {
+    if [ ${?} -ne 0 ]
+    then
+      echo failed.
+      exit 1
+    fi
 }
 
 base_dir="/stability_test"
@@ -105,20 +121,24 @@ KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it stability-test-tiflas
 scale_tiflash 2
 wait_tiflash_region_balance
 KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it stability-test-tiflash-0 -- sh $base_dir/start_stability_test.sh ${base_dir} ${tidb_host} ${pd_host} ${query} ${thread} 'none'
+exit_if_failed
 KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp stability-test-tiflash-0:$base_dir/benchbase/record/ch_benchmark_test.txt $record_dir/ch_benchmark_test_q_${query}_t_${thread}_scale_tiflash_2.txt
 
 #scale_in case
 scale_tiflash -2
 wait_tiflash_region_balance
 KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it stability-test-tiflash-0 -- sh $base_dir/start_stability_test.sh ${base_dir} ${tidb_host} ${pd_host} ${query} ${thread} 'none'
+exit_if_failed
 KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp stability-test-tiflash-0:$base_dir/benchbase/record/ch_benchmark_test.txt $record_dir/ch_benchmark_test_q_${query}_t_${thread}_scale_tiflash_-2.txt
 
 #restart case
 KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it stability-test-tiflash-0 -- sh $base_dir/start_stability_test.sh ${base_dir} ${tidb_host} ${pd_host} ${query} ${thread} 'none'
+exit_if_failed
 KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp stability-test-tiflash-0:$base_dir/benchbase/record/ch_benchmark_test.txt $record_dir/ch_benchmark_test_q_${query}_t_${thread}_before_restart_tiflash.txt
 restart_tiflash
 init_env
 KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it stability-test-tiflash-0 -- sh $base_dir/start_stability_test.sh ${base_dir} ${tidb_host} ${pd_host} ${query} ${thread} 'none'
+exit_if_failed
 KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp stability-test-tiflash-0:$base_dir/benchbase/record/ch_benchmark_test.txt $record_dir/ch_benchmark_test_q_${query}_t_${thread}_after_restart_tiflash.txt
 
 #breakdown case
@@ -129,9 +149,11 @@ do
 done
 wait_tiflash_region_balance
 KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it stability-test-tiflash-0 -- sh $base_dir/start_stability_test.sh ${base_dir} ${tidb_host} ${pd_host} ${query} ${thread} 'none'
+exit_if_failed
 KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp stability-test-tiflash-0:$base_dir/benchbase/record/ch_benchmark_test.txt $record_dir/ch_benchmark_test_q_${query}_t_${thread}_before_breakdown_tiflash.txt
 kill_tiflash
 KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it stability-test-tiflash-0 -- sh $base_dir/start_stability_test.sh ${base_dir} ${tidb_host} ${pd_host} ${query} ${thread} 'none'
+exit_if_failed
 KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp stability-test-tiflash-0:$base_dir/benchbase/record/ch_benchmark_test.txt $record_dir/ch_benchmark_test_q_${query}_t_${thread}_after_breakdown_tiflash.txt
 
 tcctl testbed delete ${namespace} -r http://rms.pingcap.net:30007

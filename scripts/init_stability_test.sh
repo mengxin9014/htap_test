@@ -49,5 +49,3 @@ mv tidb-toolkit-v5.2.2-linux-amd64/bin/br /usr/local/bin/
 wget https://download.pingcap.org/tidb-v5.3.0-linux-amd64.tar.gz
 tar zxvf tidb-v5.3.0-linux-amd64.tar.gz
 mv tidb-v5.3.0-linux-amd64/bin/pd-ctl /usr/local/bin/
-
-pd-ctl store limit all 100 -u ${pd_host}:2379
