@@ -2,7 +2,7 @@
 
 base_dir="/htap_test"
 record_dir="htap_test_record"
-mkdir $record_dir || true
+mkdir $record_dir
 
 ap_threads="1 5 10 20 30"
 for thread in $ap_threads
