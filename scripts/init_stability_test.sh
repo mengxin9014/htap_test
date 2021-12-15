@@ -11,7 +11,7 @@ yum -y install make
 yum -y install tar
 yum -y install mysql
 
-wget https://go.dev/dl/go1.17.3.linux-amd64.tar.gz
+wget https://studygolang.com/dl/golang/go1.17.3.linux-amd64.tar.gz
 tar -zxvf go1.17.3.linux-amd64.tar.gz
 mv go /usr/local
 echo "export GOROOT=/usr/local/go" >> /etc/profile

@@ -46,7 +46,7 @@ function wait_tiflash_region_balance() {
     do
       echo wait balance region.
       sleep 10
-      operator_info=$(KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it stability-test-tiflash-0 -- pd-ctl operator show -u http://${pd_host}:2379)
+      operator_info=$(KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it stability-test-tiflash-0 -- pd-ctl operator show -u http://${pd_host}:2379 | xargs echo)
     done
     echo balance region finish.
 }
@@ -99,10 +99,12 @@ tidb_host=$(KUBECONFIG=kubeconfig.yml  kubectl -n ${namespace} get pod/stability
 # init
 init_env
 
+KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it stability-test-tiflash-0 -- sh $base_dir/start_stability_test.sh ${base_dir} ${tidb_host} ${pd_host} ${query} ${thread} 's3\://benchmark/chbench_1T'
+
 #scale_out case
 scale_tiflash 2
 wait_tiflash_region_balance
-KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it stability-test-tiflash-0 -- sh $base_dir/start_stability_test.sh ${base_dir} ${tidb_host} ${pd_host} ${query} ${thread} 's3\://benchmark/chbench_1T'
+KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it stability-test-tiflash-0 -- sh $base_dir/start_stability_test.sh ${base_dir} ${tidb_host} ${pd_host} ${query} ${thread} 'none'
 KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp stability-test-tiflash-0:$base_dir/benchbase/record/ch_benchmark_test.txt $record_dir/ch_benchmark_test_q_${query}_t_${thread}_scale_tiflash_2.txt
 
 #scale_in case
