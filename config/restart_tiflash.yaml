@@ -2,6 +2,7 @@ apiVersion: pingcap.com/v1alpha1
 kind: TidbCluster
 metadata:
   name: stability-test
+  namespace: x
 spec:
   tiflash:
     replicas: x

@@ -125,6 +125,7 @@ items:
             dt_segment_force_merge_delta_rows = 8000000
             dt_segment_force_merge_delta_size = 1073741824
             dt_segment_stop_write_delta_rows = 40000000
+            dt_enable_logical_split = false
           proxy: |
             log-level = "info"
             log-file = "/var/lib/tiflash/log/proxy.log"

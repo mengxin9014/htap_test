@@ -4,7 +4,7 @@ function scale_tiflash() {
     local replicas_inteval=$1
     current_replicas=$(KUBECONFIG=kubeconfig.yml  kubectl -n ${namespace} get pod  -owide | grep tiflash | wc -l)
     target_replicas=$(expr $current_replicas + $replicas_inteval)
-    cat htap_test/config/scale_tiflash.yaml | sed "s/replicas: .*/replicas: $target_replicas/g" > htap_test/config/scale_tiflash_temp.yaml
+    cat htap_test/config/scale_tiflash.yaml | sed "s/namespace: .*/namespace: $namespace/g" | sed "s/replicas: .*/replicas: $target_replicas/g"  > htap_test/config/scale_tiflash_temp.yaml
     KUBECONFIG=kubeconfig.yml kubectl apply -f htap_test/config/scale_tiflash_temp.yaml
 
     current_replicas=$(KUBECONFIG=kubeconfig.yml  kubectl -n ${namespace} get pod  -owide | grep tiflash | wc -l)
@@ -22,7 +22,7 @@ function scale_tiflash() {
 function restart_tiflash() {
     restart_time=$(date -u "+tidb.pingcap.com\/restartedAt: %Y-%m-%dT%H:%M")
     replicas=$(KUBECONFIG=kubeconfig.yml  kubectl -n ${namespace} get pod  -owide | grep tiflash | wc -l)
-    cat htap_test/config/restart_tiflash.yaml | sed "s/restart_time/$restart_time/g" | sed "s/replicas: .*/replicas: $replicas/g" > htap_test/config/restart_tiflash_temp.yaml
+    cat htap_test/config/restart_tiflash.yaml | sed "s/namespace: .*/namespace: $namespace/g"  | sed "s/restart_time/$restart_time/g" | sed "s/replicas: .*/replicas: $replicas/g" > htap_test/config/restart_tiflash_temp.yaml
     KUBECONFIG=kubeconfig.yml kubectl apply -f htap_test/config/restart_tiflash_temp.yaml
     status=$(KUBECONFIG=kubeconfig.yml kubectl get tidbcluster stability-test -n ${namespace} | awk '{print $2}' | sed -n '2p')
     while [ $status != "False" ]
