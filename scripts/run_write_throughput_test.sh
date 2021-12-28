@@ -30,12 +30,12 @@ do
     pd_host=$(KUBECONFIG=kubeconfig.yml  kubectl -n ${namespace} get pod/write-throughput-test-pd-0 -owide | grep write-throughput-test-pd-0 | awk '{print $6}')
     tidb_host=$(KUBECONFIG=kubeconfig.yml  kubectl -n ${namespace} get pod/write-throughput-test-tidb-0 -owide | grep write-throughput-test-tidb-0 | awk '{print $6}')
 
-    KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it write-throughput-test-tiflash-0 -- mkdir $base_dir
+    KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -t workload-0 -- mkdir $base_dir
 
-    KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp htap_test/scripts/init_write_throughput_test.sh write-throughput-test-tiflash-0:$base_dir
-    KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp htap_test/scripts/start_write_throughput_test.sh write-throughput-test-tiflash-0:$base_dir
+    KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp htap_test/scripts/init_write_throughput_test.sh workload-0:$base_dir
+    KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp htap_test/scripts/start_write_throughput_test.sh workload-0:$base_dir
 
-    KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it write-throughput-test-tiflash-0 -- sh $base_dir/init_write_throughput_test.sh ${base_dir}
+    KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -t workload-0 -- sh $base_dir/init_write_throughput_test.sh ${base_dir}
 
     if [ ${?} -ne 0 ]
     then
@@ -43,10 +43,10 @@ do
       exit 1
     fi
 
-    KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp htap_test/table_statics/benchbase_table_static.tar.gz write-throughput-test-tiflash-0:$base_dir/benchbase
-    KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it write-throughput-test-tiflash-0 -- tar zxvf $base_dir/benchbase/benchbase_table_static.tar.gz -C $base_dir/benchbase
+    KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp htap_test/table_statics/benchbase_table_static.tar.gz workload-0:$base_dir/benchbase
+    KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -t workload-0 -- tar zxvf $base_dir/benchbase/benchbase_table_static.tar.gz -C $base_dir/benchbase
 
-    KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -it write-throughput-test-tiflash-0 -- sh $base_dir/start_write_throughput_test.sh ${base_dir} ${tidb_host} ${pd_host} ${thread}
+    KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} exec -t workload-0 -- sh $base_dir/start_write_throughput_test.sh ${base_dir} ${tidb_host} ${pd_host} ${thread}
 
     if [ ${?} -ne 0 ]
     then
@@ -54,7 +54,7 @@ do
       exit 1
     fi
 
-    KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp write-throughput-test-tiflash-0:$base_dir/benchbase/record/write_throughput_test.txt $record_dir/write_throughput_test_tikv_${kv}_tiflash_${flash}_t_${thread}.txt
+    KUBECONFIG=kubeconfig.yml kubectl -n ${namespace} cp workload-0:$base_dir/benchbase/record/write_throughput_test.txt $record_dir/write_throughput_test_tikv_${kv}_tiflash_${flash}_t_${thread}.txt
 
     tcctl testbed delete ${namespace} -r http://rms.pingcap.net:30007
 

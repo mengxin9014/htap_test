@@ -135,3 +135,17 @@ items:
             snap-handle-pool-size = 8
             [server]
             raft-client-queue-size = 81920
+
+  - name: workload
+    type: WORKLOAD_NODE
+    spec:
+      container:
+        name: workload
+        image: hub-new.pingcap.net/qa/betting-workload
+        securityContext:
+          capabilities:
+            add: [ "SYS_ADMIN", "SYS_PTRACE", "NET_ADMIN" ]
+        resources:
+          requests:
+            memory: 16Gi
+            cpu: 8000m
